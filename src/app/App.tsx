@@ -14,6 +14,7 @@ import {
   Wrench,
   CheckCheck
 } from "lucide-react";
+import AIImageSorter from "./components/AIImageSorter";
 
 export default function App() {
   const navigate = useNavigate();
