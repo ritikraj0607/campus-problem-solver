@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CampusAI — Student Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090f;--s1:#0d1117;--s2:#111827;--s3:#1a2235;--s4:#1e293b;
+  --accent:#7c3aed;--accent2:#a78bfa;--accent3:#c4b5fd;
+  --green:#10b981;--red:#ef4444;--amber:#f59e0b;--teal:#06b6d4;--pink:#ec4899;--blue:#3b82f6;
+  --text:#f8fafc;--text2:#94a3b8;--text3:#475569;
+  --border:#1e293b;--border2:#2d3f5a;
+  --grad:linear-gradient(135deg,#7c3aed,#ec4899);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;font-size:18px;}
+h1,h2,h3{font-family:'Syne',sans-serif;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--s1);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+
+/* ===== AUTH ===== */
+#authWrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:var(--bg);overflow-y:auto;}
+.auth-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;}
+.orb1{width:400px;height:400px;background:#7c3aed;top:-100px;left:-100px;}
+.orb2{width:300px;height:300px;background:#ec4899;bottom:-80px;right:-80px;}
+.orb3{width:200px;height:200px;background:#06b6d4;top:50%;left:50%;}
+.auth-center{position:relative;z-index:2;width:100%;max-width:420px;padding:1.5rem;}
+.auth-brand{text-align:center;margin-bottom:2rem;}
+.brand-icon{width:64px;height:64px;background:var(--grad);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;box-shadow:0 0 40px rgba(124,58,237,0.4);}
+.brand-name{font-size:30px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;}
+.brand-sub{color:var(--text2);font-size:13px;margin-top:4px;}
+.portal-tag{display:inline-block;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--accent3);font-weight:600;margin-top:8px;}
+.auth-card{background:rgba(13,17,23,0.95);border:1px solid var(--border2);border-radius:24px;padding:2rem;backdrop-filter:blur(20px);}
+.auth-tabs{display:flex;background:var(--s2);border-radius:12px;padding:4px;margin-bottom:1.5rem;}
+.auth-tab{flex:1;padding:10px;border-radius:9px;text-align:center;font-size:16px;font-weight:500;cursor:pointer;color:var(--text2);transition:all 0.2s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.field input,.field select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:17px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,0.15);}
+.field select option{background:var(--s2);}
+.btn-auth{width:100%;background:var(--grad);border:none;border-radius:11px;padding:13px;color:#fff;font-size:15px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-top:4px;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(124,58,237,0.35);}
+.btn-auth:hover{opacity:0.9;}
+.demo-pill{background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--accent3);margin-top:12px;text-align:center;}
+.admin-link{text-align:center;margin-top:14px;font-size:13px;color:var(--text3);}
+.admin-link a{color:var(--accent2);text-decoration:none;font-weight:600;}
+.admin-link a:hover{text-decoration:underline;}
+
+/* ===== MAIN APP ===== */
+#appWrap{display:none;height:100vh;flex-direction:column;}
+.topbar{height:56px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:100;}
+.tb-logo{width:32px;height:32px;background:var(--grad);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tb-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;flex:1;}
+.tb-badge{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:20px;padding:3px 10px;font-size:11px;color:#93c5fd;font-weight:600;}
+.tb-notif{width:32px;height:32px;background:var(--s2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;position:relative;}
+.tb-notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1);}
+.tb-avatar{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.tb-logout{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:4px 10px;color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.tb-logout:hover{border-color:var(--red);color:var(--red);}
+
+.app-body{flex:1;display:flex;overflow:hidden;}
+.sidebar{width:200px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:12px 8px;flex-shrink:0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.18s;margin-bottom:2px;color:var(--text2);font-size:17px;font-weight:500;}
+.nav-item:hover{background:var(--s2);color:var(--text);}
+.nav-item.active{background:rgba(124,58,237,0.15);color:var(--accent3);border:1px solid rgba(124,58,237,0.2);}
+.nav-item .ni{font-size:17px;width:20px;text-align:center;}
+.nav-sep{height:1px;background:var(--border);margin:8px 4px;}
+.nav-bottom{margin-top:auto;}
+.main-content{flex:1;overflow-y:auto;padding:20px;}
+
+/* ===== SCREENS ===== */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ===== DASHBOARD ===== */
+.dash-hero{background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(16,185,129,0.07));border:1px solid rgba(59,130,246,0.2);border-radius:20px;padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.dash-hero::before{content:'🎒';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:60px;opacity:0.1;}
+.dash-hero h2{font-size:22px;font-weight:800;margin-bottom:4px;}
+.dash-hero p{color:var(--text2);font-size:14px;}
+.dash-hero .hero-time{font-size:12px;color:#93c5fd;margin-top:6px;font-weight:500;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::after{content:attr(data-icon);position:absolute;right:10px;bottom:8px;font-size:28px;opacity:0.12;}
+.sc-num{font-size:28px;font-weight:800;font-family:'Syne',sans-serif;}
+.sc-label{font-size:11px;color:var(--text2);margin-top:2px;font-weight:500;}
+.sc-trend{font-size:11px;margin-top:6px;font-weight:600;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-head h3{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;}
+.see-all{font-size:12px;color:var(--accent2);cursor:pointer;}
+.activity-list{display:flex;flex-direction:column;gap:8px;}
+.act-item{background:var(--s3);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;transition:background 0.2s;}
+.act-item:hover{background:var(--s4);}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-info{flex:1;min-width:0;}
+.act-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-meta{font-size:11px;color:var(--text3);margin-top:1px;}
+.badge{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.2px;}
+.badge-sub{background:rgba(124,58,237,0.15);color:var(--accent3);}
+.badge-prog{background:rgba(245,158,11,0.15);color:#fbbf24;}
+.badge-res{background:rgba(16,185,129,0.15);color:#34d399;}
+.announce-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.ann-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.ann-item:last-child{border-bottom:none;padding-bottom:0;}
+.ann-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ann-text{font-size:13px;font-weight:500;}
+.ann-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.quick-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.quick-card:hover{border-color:var(--accent);background:rgba(124,58,237,0.08);transform:translateY(-2px);}
+.qc-icon{font-size:26px;margin-bottom:6px;}
+.qc-label{font-size:12px;color:var(--text2);font-weight:500;}
+
+/* ===== SUBMIT ===== */
+.submit-wrap{max-width:640px;}
+.form-card{background:var(--s2);border:1px solid var(--border);border-radius:18px;padding:20px;}
+.fc-head{font-size:18px;font-weight:800;font-family:'Syne',sans-serif;margin-bottom:4px;}
+.fc-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.f-field{margin-bottom:14px;}
+.f-field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.f-field textarea,.f-field input,.f-field select{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:17px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;}
+.f-field textarea:focus,.f-field input:focus,.f-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,0.12);}
+.f-field textarea{resize:vertical;min-height:110px;}
+.f-field select option{background:var(--s2);}
+.upload-drop{border:2px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;color:var(--text2);font-size:13px;}
+.upload-drop:hover{border-color:var(--accent);color:var(--accent3);background:rgba(124,58,237,0.04);}
+.btn-submit{background:var(--grad);border:none;border-radius:11px;padding:13px 28px;color:#fff;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(124,58,237,0.3);display:flex;align-items:center;gap:8px;}
+.btn-submit:hover{opacity:0.9;box-shadow:0 6px 24px rgba(124,58,237,0.4);}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+.ai-status{background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--accent3);margin-top:12px;}
+.success-panel{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.25);border-radius:14px;padding:20px;margin-top:14px;text-align:center;}
+.track-id-big{font-size:30px;font-weight:800;font-family:'Syne',sans-serif;color:var(--green);letter-spacing:3px;margin:10px 0;}
+.conf-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:20px;padding:4px 12px;font-size:12px;color:#34d399;margin:4px;}
+
+/* ===== MY ISSUES ===== */
+.issues-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border2);color:var(--text2);background:var(--s2);transition:all 0.18s;font-family:'DM Sans',sans-serif;}
+.filter-btn.active{background:rgba(124,58,237,0.15);border-color:var(--accent);color:var(--accent3);}
+.issue-card{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;transition:all 0.2s;}
+.issue-card:hover{border-color:var(--border2);}
+.ic-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px;}
+.ic-id{font-size:12px;font-weight:700;color:var(--accent2);font-family:'Syne',sans-serif;}
+.ic-time{font-size:11px;color:var(--text3);}
+.ic-desc{font-size:17px;font-weight:500;margin-bottom:6px;line-height:1.5;}
+.ic-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ic-tag{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--text2);}
+.progress-track{height:4px;background:var(--s4);border-radius:99px;overflow:hidden;margin-bottom:10px;}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.8s ease;}
+.response-box{background:var(--s3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:var(--text2);}
+.response-box strong{color:var(--green);display:block;font-size:11px;margin-bottom:3px;}
+
+/* ===== INFO HUB ===== */
+.info-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.info-tab{padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border2);color:var(--text2);background:var(--s2);transition:all 0.2s;font-family:'DM Sans',sans-serif;font-weight:500;}
+.info-tab.active{background:rgba(124,58,237,0.15);border-color:var(--accent);color:var(--accent3);}
+.info-panel{display:none;}
+.info-panel.active{display:block;}
+.info-card{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+.info-card h3{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.data-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.data-row:last-child{border-bottom:none;padding-bottom:0;}
+.dr-label{font-size:13px;color:var(--text2);}
+.dr-val{font-size:13px;font-weight:500;}
+.bus-times{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.bus-chip{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.bus-chip.next{border-color:var(--green);background:rgba(16,185,129,0.1);color:var(--green);}
+.lf-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lf-item:last-child{border-bottom:none;}
+.lf-badge{padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;flex-shrink:0;}
+.lf-lost{background:rgba(239,68,68,0.12);color:#f87171;}
+.lf-found{background:rgba(16,185,129,0.12);color:#34d399;}
+.lf-info{flex:1;}
+.lf-name{font-size:13px;font-weight:500;}
+.lf-sub{font-size:11px;color:var(--text3);}
+.emergency-btn{width:100%;background:linear-gradient(135deg,#dc2626,#991b1b);border:none;border-radius:13px;padding:15px;color:#fff;font-size:16px;font-weight:800;font-family:'Syne',sans-serif;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(239,68,68,0.3);transition:all 0.2s;letter-spacing:0.5px;}
+.emergency-btn:hover{box-shadow:0 6px 28px rgba(239,68,68,0.45);transform:translateY(-1px);}
+.sos-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sos-card{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.sos-card:hover{background:rgba(239,68,68,0.1);}
+.sos-num{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;color:#f87171;}
+.sos-label{font-size:11px;color:var(--text2);margin-top:3px;}
+.schol-card{background:var(--s3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.schol-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.schol-name{font-size:13px;font-weight:600;}
+.schol-criteria{font-size:11px;color:var(--text2);}
+.schol-amount{font-size:14px;font-weight:700;color:var(--green);margin-left:auto;flex-shrink:0;}
+.fee-card{background:var(--s3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.fee-info{font-size:13px;font-weight:500;}
+.fee-due{font-size:11px;color:var(--text3);margin-top:2px;}
+.fee-amount{font-size:16px;font-weight:800;font-family:'Syne',sans-serif;color:var(--accent2);}
+
+/* ===== CHATBOT ===== */
+.chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--grad);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 24px rgba(124,58,237,0.5);z-index:500;transition:all 0.3s;}
+.chat-fab:hover{transform:scale(1.1);}
+.chat-fab.open{transform:scale(0.9);}
+.fab-notif{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--red);border-radius:50%;border:2px solid var(--bg);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.chat-window{position:fixed;bottom:92px;right:24px;width:340px;height:480px;background:var(--s1);border:1px solid var(--border2);border-radius:22px;display:flex;flex-direction:column;z-index:499;box-shadow:0 12px 48px rgba(0,0,0,0.6);overflow:hidden;transition:all 0.3s;transform-origin:bottom right;}
+.chat-window.hidden{opacity:0;pointer-events:none;transform:scale(0.85);}
+.chat-window.visible{opacity:1;pointer-events:all;transform:scale(1);}
+.chat-header{background:var(--grad);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.ch-bot{width:38px;height:38px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.ch-info h4{font-size:14px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;}
+.ch-info p{font-size:11px;color:rgba(255,255,255,0.75);}
+.ch-status{width:8px;height:8px;background:#4ade80;border-radius:50%;margin-left:auto;flex-shrink:0;}
+.ch-close{background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:28px;height:28px;color:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;margin-left:4px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.msg-wrap{display:flex;flex-direction:column;}
+.msg-wrap.user{align-items:flex-end;}
+.msg-wrap.bot{align-items:flex-start;}
+.msg-bubble{max-width:82%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.6;}
+.msg-bubble.bot{background:var(--s3);color:var(--text);border-bottom-left-radius:4px;}
+.msg-bubble.user{background:var(--grad);color:#fff;border-bottom-right-radius:4px;}
+.msg-bubble.typing{color:var(--text2);font-style:italic;}
+.msg-time{font-size:10px;color:var(--text3);margin-top:3px;padding:0 4px;}
+.chat-chips{padding:8px 12px;display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid var(--border);}
+.chip{background:var(--s3);border:1px solid var(--border2);border-radius:20px;padding:5px 11px;font-size:11px;cursor:pointer;color:var(--text2);transition:all 0.15s;font-weight:500;}
+.chip:hover{border-color:var(--accent);color:var(--accent3);background:rgba(124,58,237,0.08);}
+.chat-input-bar{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.chat-input{flex:1;background:var(--s3);border:1px solid var(--border2);border-radius:20px;padding:9px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;}
+.chat-input:focus{border-color:var(--accent);}
+.chat-send{background:var(--grad);border:none;border-radius:50%;width:36px;height:36px;color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.2s;}
+.chat-send:hover{opacity:0.85;}
+
+/* ===== UTILS ===== */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fadein{animation:fadeUp 0.35s ease;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.pulsing{animation:pulse 1.5s ease infinite;}
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav{display:none;background:var(--s1);border-top:1px solid var(--border);padding:8px 4px;flex-shrink:0;}
+.mobile-nav-items{display:flex;}
+.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;}
+.mn-icon{font-size:19px;}
+.mn-label{font-size:10px;color:var(--text3);font-weight:500;}
+.mn-item.active .mn-label{color:var(--accent3);}
+
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .mobile-nav{display:flex;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .quick-grid{grid-template-columns:repeat(3,1fr);}
+  .chat-window{width:calc(100vw - 32px);right:16px;}
+}
+/* full-screen loading */
+#campusaiLoading{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(7,9,15,0.94);backdrop-filter:blur(10px);}
+#campusaiLoading.visible{display:flex;}
+.campusai-spin{width:56px;height:56px;border:4px solid rgba(124,58,237,0.25);border-top-color:var(--accent);border-radius:50%;animation:spin 0.75s linear infinite;margin-bottom:1.25rem;}
+#campusaiLoadingText{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;color:var(--text);text-align:center;max-width:22rem;padding:0 1rem;line-height:1.35;}
+</style>
+</head>
+<body>
+<div id="campusaiLoading" aria-live="polite" aria-busy="false">
+  <div class="campusai-spin" aria-hidden="true"></div>
+  <p id="campusaiLoadingText">Please wait…</p>
+</div>
+
+<!-- ========== AUTH ========== -->
+<div id="authWrap">
+  <div class="auth-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="auth-center">
+    <div class="auth-brand">
+      <div class="brand-icon">🎒</div>
+      <div class="brand-name">CampusAI</div>
+      <div class="brand-sub">Your intelligent campus companion</div>
+      <div class="portal-tag">🎓 Student Portal</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
+        <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+      </div>
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="student@college.edu" value="student@college.edu"/></div>
+        <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" value="pass123"/></div>
+        <button class="btn-auth" onclick="doLogin()">Sign In →</button>
+        <div class="demo-pill">Demo: any email & password works</div>
+      </div>
+      <!-- SIGNUP -->
+      <div id="signupForm" style="display:none;">
+        <div class="field"><label>Full Name</label><input type="text" id="signupName" placeholder="Rahul Sharma"/></div>
+        <div class="field"><label>Roll Number</label><input type="text" id="signupRoll" placeholder="21CS1001"/></div>
+        <div class="field"><label>Email</label><input type="email" id="signupEmail" placeholder="roll@college.edu"/></div>
+        <div class="field"><label>Department</label>
+          <select id="signupDept">
+            <option>Computer Science</option><option>Electronics</option><option>Mechanical</option>
+            <option>Civil</option><option>MBA</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Password</label><input type="password" id="signupPass" placeholder="Create password"/></div>
+        <button class="btn-auth" onclick="doSignup()">Create Account →</button>
+      </div>
+      <div class="admin-link">Admin? <a href="auth">Go to sign in →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="appWrap" style="display:none;height:100vh;flex-direction:column;">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">🎒</div>
+    <div class="tb-title">CampusAI</div>
+    <div class="tb-badge">🎓 Student</div>
+    <div style="flex:1;"></div>
+    <div class="tb-notif" onclick="showStudentNotifications()"><div class="tb-notif-dot" id="tbNotifDot"></div>🔔</div>
+    <div class="tb-avatar" id="tbAvatar">RS</div>
+    <button class="tb-logout" onclick="doLogout()">Logout</button>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="nav-item active" id="nav-home" onclick="showScreen('home')"><span class="ni">🏠</span> Dashboard</div>
+      <div class="nav-item" id="nav-submit" onclick="showScreen('submit')"><span class="ni">📝</span> Submit Issue</div>
+      <div class="nav-item" id="nav-myissues" onclick="showScreen('myissues')"><span class="ni">📋</span> My Issues</div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" id="nav-bus" onclick="showScreen('info');showInfoTab('bus')"><span class="ni">🚌</span> Bus Times</div>
+      <div class="nav-item" id="nav-lostfound" onclick="showScreen('info');showInfoTab('lostfound')"><span class="ni">🔍</span> Lost & Found</div>
+      <div class="nav-item" id="nav-medical" onclick="showScreen('info');showInfoTab('medical')"><span class="ni">🏥</span> Medical</div>
+      <div class="nav-item" id="nav-fees" onclick="showScreen('info');showInfoTab('fees')"><span class="ni">💰</span> Fees & Schol</div>
+      <div class="nav-item" id="nav-emergency" onclick="showScreen('info');showInfoTab('emergency')"><span class="ni">🆘</span> Emergency</div>
+      <div class="nav-bottom">
+        <div class="nav-item" id="nav-info" onclick="showScreen('info');showInfoTab('bus')"><span class="ni">ℹ️</span> Info Hub</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="main-content" id="mainContent">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="screen active fadein" id="screen-home">
+        <div class="dash-hero">
+          <h2>Hello, <span id="greetName">Student</span> 👋</h2>
+          <p>Your campus. Your voice. AI-powered resolution.</p>
+          <div class="hero-time" id="heroTime">Loading time...</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card" data-icon="📋"><div class="sc-num" id="st-total">3</div><div class="sc-label">Total Complaints</div><div class="sc-trend" style="color:var(--blue);">All time</div></div>
+          <div class="stat-card" data-icon="✅"><div class="sc-num" id="st-res" style="color:var(--green);">1</div><div class="sc-label">Resolved</div><div class="sc-trend" style="color:var(--green);">↑ 33%</div></div>
+          <div class="stat-card" data-icon="⏳"><div class="sc-num" id="st-prog" style="color:var(--amber);">1</div><div class="sc-label">In Progress</div><div class="sc-trend" style="color:var(--amber);">Active</div></div>
+          <div class="stat-card" data-icon="🚌"><div class="sc-num" style="font-size:18px;color:var(--teal);">5:00 PM</div><div class="sc-label">Next Bus (→Hostel)</div><div class="sc-trend" style="color:var(--teal);">In 2h 15m</div></div>
+        </div>
+        <div class="section-head"><h3>Quick Actions</h3></div>
+        <div class="quick-grid" style="margin-bottom:20px;">
+          <div class="quick-card" onclick="showScreen('submit')"><div class="qc-icon">📝</div><div class="qc-label">Submit Issue</div></div>
+          <div class="quick-card" onclick="showScreen('info');showInfoTab('bus')"><div class="qc-icon">🚌</div><div class="qc-label">Bus Times</div></div>
+          <div class="quick-card" onclick="showScreen('info');showInfoTab('lostfound')"><div class="qc-icon">🔍</div><div class="qc-label">Lost & Found</div></div>
+          <div class="quick-card" onclick="showScreen('info');showInfoTab('medical')"><div class="qc-icon">🏥</div><div class="qc-label">Medical</div></div>
+          <div class="quick-card" onclick="showScreen('info');showInfoTab('fees')"><div class="qc-icon">💰</div><div class="qc-label">Fees & Schol</div></div>
+          <div class="quick-card" onclick="showScreen('info');showInfoTab('emergency')"><div class="qc-icon">🆘</div><div class="qc-label">Emergency</div></div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="section-head"><h3>Recent Activity</h3><span class="see-all" onclick="showScreen('myissues')">View all →</span></div>
+            <div class="activity-list" id="recentList"></div>
+          </div>
+          <div>
+            <div class="section-head"><h3>Campus Announcements</h3></div>
+            <div class="announce-card" id="studentAnnounceCard"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SUBMIT ===== -->
+      <div class="screen fadein" id="screen-submit">
+        <div class="submit-wrap">
+          <div class="form-card">
+            <div class="fc-head">Submit a Complaint</div>
+            <div class="fc-sub">Describe your issue — our AI will classify and route it automatically.</div>
+            <div class="f-field">
+              <label>Problem Description *</label>
+              <textarea id="compDesc" placeholder="e.g. Bathroom on 3rd floor Block B has no water since 2 days..."></textarea>
+            </div>
+            <div class="f-field">
+              <label>Category (or let AI auto-detect)</label>
+              <select id="compCat">
+                <option value="">🤖 AI Auto-Detect (Recommended)</option>
+                <option>Bathroom & Hygiene</option>
+                <option>Anti-Ragging & Safety</option>
+                <option>Mess & Food Quality</option>
+                <option>Academic Issues</option>
+                <option>Infrastructure/Maintenance</option>
+                <option>Lost & Found</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="f-field"><label>Location (optional)</label><input type="text" id="compLoc" placeholder="Block B, Room 204"/></div>
+              <div class="f-field"><label>Priority</label>
+                <select id="compPri">
+                  <option value="Normal">Normal</option>
+                  <option value="High">High</option>
+                  <option value="Urgent">Urgent 🔴</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-field">
+              <label>Attach Image (optional)</label>
+              <div class="upload-drop" onclick="alert('📎 Image upload works in production!')">📷 Tap to upload photo of the issue</div>
+            </div>
+            <button class="btn-submit" onclick="submitComplaint()" id="submitBtn"><span id="submitBtnText">🚀 Submit Complaint</span></button>
+            <div class="ai-status pulsing" id="aiStatus" style="display:none;"><div class="spinner"></div> AI Agent is classifying your complaint and routing to the right department...</div>
+            <div class="success-panel" id="successPanel" style="display:none;">
+              <div style="font-size:20px;">🎉</div>
+              <div style="font-size:14px;font-weight:600;margin-top:6px;">Complaint Submitted Successfully!</div>
+              <div class="track-id-big" id="trackIdBig">TRK-XXX</div>
+              <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:8px;">
+                <span class="conf-badge">📂 Category: <span id="detCat">—</span></span>
+                <span class="conf-badge">🏢 Routed to: <span id="detDept">—</span></span>
+                <span class="conf-badge">🎯 Confidence: <span id="detConf">—</span></span>
+              </div>
+              <div style="font-size:12px;color:var(--text2);margin-top:10px;">Track status in "My Issues" · Department notified ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MY ISSUES ===== -->
+      <div class="screen fadein" id="screen-myissues">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">My Complaints</h3></div>
+        <div class="issues-filter">
+          <div class="filter-btn active" onclick="filterIssues('all',this)">All</div>
+          <div class="filter-btn" onclick="filterIssues('Submitted',this)">Submitted</div>
+          <div class="filter-btn" onclick="filterIssues('In Progress',this)">In Progress</div>
+          <div class="filter-btn" onclick="filterIssues('Resolved',this)">Resolved</div>
+        </div>
+        <div id="issuesList"></div>
+      </div>
+
+      <!-- ===== INFO HUB ===== -->
+      <div class="screen fadein" id="screen-info">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">Info Hub</h3></div>
+        <div class="info-tabs">
+          <div class="info-tab active" onclick="showInfoTab('bus')">🚌 Bus</div>
+          <div class="info-tab" onclick="showInfoTab('lostfound')">🔍 Lost & Found</div>
+          <div class="info-tab" onclick="showInfoTab('medical')">🏥 Medical</div>
+          <div class="info-tab" onclick="showInfoTab('fees')">💰 Fees</div>
+          <div class="info-tab" onclick="showInfoTab('emergency')">🆘 Emergency</div>
+        </div>
+
+        <!-- BUS -->
+        <div class="info-panel active" id="panel-bus">
+          <div class="info-card"><h3>🚌 College → Hostel</h3><div class="bus-times"><div class="bus-chip">8:00 AM</div><div class="bus-chip">10:30 AM</div><div class="bus-chip">1:00 PM</div><div class="bus-chip">3:30 PM</div><div class="bus-chip next">⭐ 5:00 PM (Next)</div><div class="bus-chip">7:00 PM</div><div class="bus-chip">9:30 PM</div></div></div>
+          <div class="info-card"><h3>🚌 Hostel → College</h3><div class="bus-times"><div class="bus-chip">6:30 AM</div><div class="bus-chip">7:15 AM</div><div class="bus-chip">9:00 AM</div><div class="bus-chip next">⭐ 12:00 PM (Next)</div><div class="bus-chip">2:30 PM</div><div class="bus-chip">4:15 PM</div><div class="bus-chip">6:45 PM</div><div class="bus-chip">9:00 PM (Last)</div></div></div>
+          <div class="info-card"><h3>📍 Route & Stops</h3>
+            <div class="data-row"><span class="dr-label">Stop 1</span><span class="dr-val">College Main Gate</span></div>
+            <div class="data-row"><span class="dr-label">Stop 2</span><span class="dr-val">Admin Block</span></div>
+            <div class="data-row"><span class="dr-label">Stop 3</span><span class="dr-val">Library Circle</span></div>
+            <div class="data-row"><span class="dr-label">Stop 4</span><span class="dr-val">Boys Hostel Gate A</span></div>
+            <div class="data-row"><span class="dr-label">Stop 5</span><span class="dr-val">Girls Hostel Gate</span></div>
+            <div class="data-row"><span class="dr-label">Driver Contact</span><span class="dr-val" style="color:var(--teal);">Ramesh: 9876500001</span></div>
+          </div>
+        </div>
+
+        <!-- LOST & FOUND -->
+        <div class="info-panel" id="panel-lostfound">
+          <div class="info-card"><h3>🔍 Recent Lost & Found Items</h3>
+            <div class="lf-item"><span class="lf-badge lf-lost">LOST</span><div class="lf-info"><div class="lf-name">Blue Casio fx-991 Calculator</div><div class="lf-sub">Library Reading Hall · Apr 10 · Call: 9876543210</div></div></div>
+            <div class="lf-item"><span class="lf-badge lf-found">FOUND</span><div class="lf-info"><div class="lf-name">Black Leather Wallet</div><div class="lf-sub">Canteen · Apr 12 · Contact Admin Office</div></div></div>
+            <div class="lf-item"><span class="lf-badge lf-lost">LOST</span><div class="lf-info"><div class="lf-name">Red & White Umbrella</div><div class="lf-sub">Lecture Block B · Apr 11 · Call: 8765432109</div></div></div>
+            <div class="lf-item"><span class="lf-badge lf-found">FOUND</span><div class="lf-info"><div class="lf-name">Student ID Card — Priya Kumari</div><div class="lf-sub">Sports Ground · Apr 13 · Deposit: Security Office</div></div></div>
+            <div class="lf-item"><span class="lf-badge lf-lost">LOST</span><div class="lf-info"><div class="lf-name">Apple AirPods (White Case)</div><div class="lf-sub">Seminar Hall 2 · Apr 9 · Call: 7654321098</div></div></div>
+            <div class="lf-item"><span class="lf-badge lf-found">FOUND</span><div class="lf-info"><div class="lf-name">Blue Denim Jacket</div><div class="lf-sub">Gym Locker Room · Apr 12 · Ask Warden</div></div></div>
+          </div>
+          <button class="btn-auth" onclick="showScreen('submit')" style="margin-top:4px;">+ Report Lost / Found Item</button>
+        </div>
+
+        <!-- MEDICAL -->
+        <div class="info-panel" id="panel-medical">
+          <div class="info-card"><h3>🏥 Health Center</h3>
+            <div class="data-row"><span class="dr-label">Location</span><span class="dr-val">Health Center, Block A, Ground Floor</span></div>
+            <div class="data-row"><span class="dr-label">Hours</span><span class="dr-val">Mon – Sat: 9:00 AM – 5:00 PM</span></div>
+            <div class="data-row"><span class="dr-label">Doctor</span><span class="dr-val">Dr. Priya Mehta — Tue & Thu, 10 AM–1 PM</span></div>
+            <div class="data-row"><span class="dr-label">Nurse</span><span class="dr-val">Available 24×7 (on-call at night)</span></div>
+            <div class="data-row"><span class="dr-label">Ambulance</span><span class="dr-val" style="color:var(--red);">24×7 · Security Gate · Ext: 1122</span></div>
+            <div class="data-row"><span class="dr-label">Phone</span><span class="dr-val" style="color:var(--teal);">0651-XXXXXX</span></div>
+          </div>
+          <div class="info-card"><h3>💊 Medicines Available (Free for students)</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Paracetamol</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">ORS Sachets</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Antacids</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Bandages & Antiseptic</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Eye Drops</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Cold & Flu Tablets</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">First Aid Kit</span>
+              <span style="background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);">Vitamin C Tablets</span>
+            </div>
+          </div>
+          <div class="info-card" style="border-color:rgba(124,58,237,0.2);">
+            <h3 style="color:var(--accent3);">🧠 Mental Health & Counseling</h3>
+            <div class="data-row"><span class="dr-label">Counselor</span><span class="dr-val">Dr. Anjali Rao (Confidential)</span></div>
+            <div class="data-row"><span class="dr-label">Schedule</span><span class="dr-val">Wed & Fri — 2:00 PM to 5:00 PM</span></div>
+            <div class="data-row"><span class="dr-label">Booking</span><span class="dr-val">Walk-in or contact Admin Office</span></div>
+            <div style="background:rgba(124,58,237,0.06);border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:var(--text2);">All sessions are 100% confidential. No information is shared without your consent.</div>
+          </div>
+        </div>
+
+        <!-- FEES -->
+        <div class="info-panel" id="panel-fees">
+          <div class="info-card"><h3>💰 Fee Structure 2024–25</h3>
+            <div class="fee-card"><div><div class="fee-info">Tuition Fee</div><div class="fee-due">📅 Due: June 30, 2025</div></div><div class="fee-amount">₹85,000</div></div>
+            <div class="fee-card"><div><div class="fee-info">Hostel Fee (per year)</div><div class="fee-due">📅 Due: July 15, 2025</div></div><div class="fee-amount">₹42,000</div></div>
+            <div class="fee-card"><div><div class="fee-info">Mess Fee (per month)</div><div class="fee-due">📅 Due: 5th of each month</div></div><div class="fee-amount">₹3,200</div></div>
+            <div class="fee-card"><div><div class="fee-info">Exam Fee (per semester)</div><div class="fee-due">📅 Due: Nov 10</div></div><div class="fee-amount">₹1,500</div></div>
+            <div class="fee-card"><div><div class="fee-info">Library Fee (annual)</div><div class="fee-due">📅 One time / year</div></div><div class="fee-amount">₹2,000</div></div>
+            <div class="fee-card"><div><div class="fee-info">Sports & Activity Fee</div><div class="fee-due">📅 Due: July</div></div><div class="fee-amount">₹1,200</div></div>
+          </div>
+          <div class="info-card"><h3>🏆 Scholarships Available</h3>
+            <div class="schol-card"><div class="schol-icon" style="background:rgba(245,158,11,0.12);">🏅</div><div><div class="schol-name">Merit Scholarship</div><div class="schol-criteria">CGPA ≥ 8.5 in previous semester</div></div><div class="schol-amount">₹20,000/yr</div></div>
+            <div class="schol-card"><div class="schol-icon" style="background:rgba(59,130,246,0.12);">📜</div><div><div class="schol-name">SC/ST Scholarship (Govt)</div><div class="schol-criteria">Valid category certificate required</div></div><div class="schol-amount">Full Waiver</div></div>
+            <div class="schol-card"><div class="schol-icon" style="background:rgba(16,185,129,0.12);">⚽</div><div><div class="schol-name">Sports Excellence Award</div><div class="schol-criteria">State/National level players</div></div><div class="schol-amount">₹15,000/yr</div></div>
+            <div class="schol-card"><div class="schol-icon" style="background:rgba(236,72,153,0.12);">🌟</div><div><div class="schol-name">Minority Scholarship</div><div class="schol-criteria">Annual family income &lt; ₹1L</div></div><div class="schol-amount">₹12,000/yr</div></div>
+            <div class="schol-card"><div class="schol-icon" style="background:rgba(124,58,237,0.12);">🎖️</div><div><div class="schol-name">Girls Education Scholarship</div><div class="schol-criteria">All female students · Auto-applied</div></div><div class="schol-amount">₹8,000/yr</div></div>
+          </div>
+        </div>
+
+        <!-- EMERGENCY -->
+        <div class="info-panel" id="panel-emergency">
+          <button class="emergency-btn" onclick="alert('📞 Calling Campus Emergency: 0651-XXXXXX\n\nIn a real emergency, please dial this number immediately!')">🆘 CALL CAMPUS EMERGENCY NOW</button>
+          <div class="sos-grid">
+            <div class="sos-card" onclick="alert('Calling Police: 100')"><div class="sos-num">100</div><div class="sos-label">🚔 Police</div></div>
+            <div class="sos-card" onclick="alert('Calling Ambulance: 108')"><div class="sos-num">108</div><div class="sos-label">🚑 Ambulance</div></div>
+            <div class="sos-card" onclick="alert('Calling Fire Brigade: 101')"><div class="sos-num">101</div><div class="sos-label">🔥 Fire Brigade</div></div>
+            <div class="sos-card" onclick="alert('Anti-Ragging Helpline: 1800-180-5522')"><div class="sos-num" style="font-size:14px;">1800-180</div><div class="sos-label">🛡️ Anti-Ragging</div></div>
+          </div>
+          <div class="info-card"><h3>📞 Campus Emergency Contacts</h3>
+            <div class="data-row"><span class="dr-label">Campus Emergency</span><span class="dr-val" style="color:var(--red);">0651-XXXXXX</span></div>
+            <div class="data-row"><span class="dr-label">Security (24×7)</span><span class="dr-val" style="color:var(--red);">Ext: 1100</span></div>
+            <div class="data-row"><span class="dr-label">Women's Helpline</span><span class="dr-val" style="color:var(--red);">Ext: 2210</span></div>
+            <div class="data-row"><span class="dr-label">Warden (Boys)</span><span class="dr-val">Mr. Ravi Kumar · 9876000001</span></div>
+            <div class="data-row"><span class="dr-label">Warden (Girls)</span><span class="dr-val">Mrs. Sunita Devi · 9876000002</span></div>
+            <div class="data-row"><span class="dr-label">Anti-Ragging Cell</span><span class="dr-val">1800-180-5522 (Toll-free)</span></div>
+          </div>
+          <div class="info-card" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.03);">
+            <h3 style="color:#f87171;">🛡️ Anti-Ragging & Safety Policy</h3>
+            <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+              • All complaints are 100% confidential<br>• Anonymous reporting available via portal<br>• Zero tolerance — strict action guaranteed<br>• CCTV monitoring across all campus zones<br>• Female security staff available round the clock
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-body -->
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-nav">
+    <div class="mobile-nav-items">
+      <div class="mn-item active" id="mn-home" onclick="showScreen('home')"><div class="mn-icon">🏠</div><div class="mn-label">Home</div></div>
+      <div class="mn-item" id="mn-submit" onclick="showScreen('submit')"><div class="mn-icon">📝</div><div class="mn-label">Submit</div></div>
+      <div class="mn-item" id="mn-myissues" onclick="showScreen('myissues')"><div class="mn-icon">📋</div><div class="mn-label">Issues</div></div>
+      <div class="mn-item" id="mn-info" onclick="showScreen('info')"><div class="mn-icon">ℹ️</div><div class="mn-label">Info</div></div>
+    </div>
+  </div>
+</div><!-- /appWrap -->
+
+<!-- ========== CHATBOT ========== -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()">
+  💬
+  <span class="fab-notif" id="fabNotif">1</span>
+</button>
+<div class="chat-window hidden" id="chatWindow">
+  <div class="chat-header">
+    <div class="ch-bot">🤖</div>
+    <div class="ch-info"><h4>CampusBot AI</h4><p>Ask me anything about campus!</p></div>
+    <div class="ch-status"></div>
+    <button class="ch-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-chips" id="chatChips">
+    <div class="chip" onclick="chipSend('Bus timings from college to hostel today')">🚌 Bus times</div>
+    <div class="chip" onclick="chipSend('Medical emergency what to do')">🏥 Medical help</div>
+    <div class="chip" onclick="chipSend('I lost my calculator in library')">🔍 Lost item</div>
+    <div class="chip" onclick="chipSend('What scholarships am I eligible for CGPA 8.7')">🏆 Scholarships</div>
+    <div class="chip" onclick="chipSend('Fee payment last date and amount')">💰 Fee info</div>
+    <div class="chip" onclick="chipSend('Someone is ragging me what should I do')">🛡️ Anti-ragging</div>
+    <div class="chip" onclick="chipSend('How to submit a complaint on this portal')">📝 Submit issue</div>
+  </div>
+  <div class="chat-input-bar">
+    <input class="chat-input" id="chatInput" placeholder="Ask anything campus-related..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let chatOpen = false;
+let chatHistory = [];
+let isBotTyping = false;
+
+let complaints = [
+  {id:'TRK-001',desc:'Water not coming in 3rd floor bathroom Block B since 2 days. Smell is bad too.',category:'Bathroom & Hygiene',dept:'Housekeeping Dept',status:'Resolved',priority:'High',loc:'Block B, 3rd Floor',time:'2 days ago',response:'Pipe blockage identified and fixed. Water supply restored to 3rd floor. Cleaning also done.',user:'student@college.edu'},
+  {id:'TRK-002',desc:'Food quality in mess is very poor this week. Dal is watery and roti is half-cooked.',category:'Mess & Food Quality',dept:'Mess Committee',status:'In Progress',priority:'Normal',loc:'Main Mess',time:'5 hours ago',response:'',user:'student@college.edu'},
+  {id:'TRK-003',desc:'Projector in Room 204 Lecture Block not working for past 3 days. Classes are affected.',category:'Infrastructure/Maintenance',dept:'Maintenance Dept',status:'Submitted',priority:'Normal',loc:'Lecture Block, Room 204',time:'Just now',response:'',user:'student@college.edu'},
+];
+
+const DEPT_MAP = {
+  'Bathroom & Hygiene':'Housekeeping Dept','Anti-Ragging & Safety':'Student Welfare Office',
+  'Mess & Food Quality':'Mess Committee','Academic Issues':'Academic Affairs Office',
+  'Infrastructure/Maintenance':'Maintenance Dept','Lost & Found':'Security Office','Other':'Admin Office'
+};
+
+const ANN_STORAGE_KEY = 'campusai_announcements_v1';
+const DEFAULT_ANNOUNCEMENTS_STUDENT = [
+  {id:1, title:'Power outage — Block C', msg:'Scheduled maintenance today 6:00 PM – 8:00 PM. Backup power available for labs.', icon:'⚡', time:'Today', color:'rgba(239,68,68,0.12)'},
+  {id:2, title:'Special Diwali Mess Menu', msg:'Special menu tomorrow dinner. Sweets and snacks included.', icon:'🍽️', time:'Today', color:'rgba(16,185,129,0.12)'},
+  {id:3, title:'Fee Payment Deadline', msg:'Tuition fee last date: June 30. Pay at Finance Office or online portal. No late fee till then.', icon:'📅', time:'Yesterday', color:'rgba(124,58,237,0.12)'},
+  {id:4, title:'Scholarship Applications Open', msg:'Merit scholarship form available at Admin Office. CGPA ≥ 8.5 required.', icon:'🏆', time:'2 days ago', color:'rgba(6,182,212,0.12)'},
+];
+function cloneAnnDefaultsStudent() {
+  return DEFAULT_ANNOUNCEMENTS_STUDENT.map(function(a){ return Object.assign({}, a); });
+}
+function loadAnnouncementsShared() {
+  try {
+    var s = localStorage.getItem(ANN_STORAGE_KEY);
+    if (s === null || s === '') return cloneAnnDefaultsStudent();
+    var p = JSON.parse(s);
+    return Array.isArray(p) ? p : cloneAnnDefaultsStudent();
+  } catch (e) {
+    return cloneAnnDefaultsStudent();
+  }
+}
+function escapeAnnHtml(t) {
+  if (t == null || t === '') return '';
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function renderStudentAnnouncements() {
+  var el = document.getElementById('studentAnnounceCard');
+  if (!el) return;
+  var list = loadAnnouncementsShared();
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:18px;color:var(--text2);text-align:center;font-size:15px;">No announcements yet. Check back later.</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(a) {
+    var prev = (a.msg || '').replace(/\s+/g, ' ').trim();
+    if (prev.length > 100) prev = prev.slice(0, 100) + '…';
+    return '<div class="ann-item fadein"><div class="ann-icon" style="background:' + (a.color || 'rgba(124,58,237,0.12)') + ';">' + (a.icon || '📢') + '</div><div><div class="ann-text">' + escapeAnnHtml(a.title) + '</div><div class="ann-sub">' + escapeAnnHtml(prev) + '</div><div class="ann-sub" style="margin-top:3px;opacity:0.85;">' + escapeAnnHtml(a.time || '') + '</div></div></div>';
+  }).join('');
+}
+function updateStudentNotifDot() {
+  var dot = document.getElementById('tbNotifDot');
+  if (!dot) return;
+  dot.style.display = loadAnnouncementsShared().length > 0 ? 'block' : 'none';
+}
+function showStudentNotifications() {
+  var lines = [];
+  loadAnnouncementsShared().slice(0, 12).forEach(function(a) {
+    var m = String(a.msg || '').replace(/\s+/g, ' ').trim();
+    if (m.length > 100) m = m.slice(0, 100) + '…';
+    lines.push((a.icon || '📢') + ' ' + (a.title || 'Notice') + '\n   ' + m + (a.time ? '\n   — ' + a.time : ''));
+  });
+  complaints.filter(function(c) { return c.user === currentUser && c.status === 'Resolved'; }).slice(0, 5).forEach(function(c) {
+    lines.push('✅ ' + c.id + ' resolved\n   ' + String(c.desc).slice(0, 72) + (c.desc.length > 72 ? '…' : ''));
+  });
+  if (!lines.length) lines.push('No notifications right now.');
+  alert('🔔 Notifications\n\n• ' + lines.join('\n\n• '));
+}
+window.addEventListener('storage', function(e) {
+  if (e.key === ANN_STORAGE_KEY) {
+    renderStudentAnnouncements();
+    updateStudentNotifDot();
+  }
+});
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState !== 'visible') return;
+  var app = document.getElementById('appWrap');
+  if (app && app.style.display === 'flex') {
+    renderStudentAnnouncements();
+    updateStudentNotifDot();
+  }
+});
+
+const CAMPUSAI_LOAD_MS = 2600;
+function campusaiDelay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function showCampusaiLoading(msg){
+  var o = document.getElementById('campusaiLoading');
+  var t = document.getElementById('campusaiLoadingText');
+  if (t) t.textContent = msg || 'Please wait…';
+  if (o) { o.setAttribute('aria-busy','true'); o.classList.add('visible'); }
+}
+function hideCampusaiLoading(){
+  var o = document.getElementById('campusaiLoading');
+  if (o) { o.setAttribute('aria-busy','false'); o.classList.remove('visible'); }
+}
+
+// ===== AUTH =====
+function persistStudentSession(email, displayName) {
+  sessionStorage.setItem('campusai_auth','1');
+  sessionStorage.setItem('campusai_role','student');
+  sessionStorage.setItem('campusai_display', displayName);
+  sessionStorage.setItem('campusai_email', email || '');
+}
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>{t.classList.toggle('active',(tab==='login'&&i===0)||(tab==='signup'&&i===1));});
+  document.getElementById('loginForm').style.display = tab==='login'?'block':'none';
+  document.getElementById('signupForm').style.display = tab==='signup'?'block':'none';
+}
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPass').value;
+  if (!email || !pass) { alert('Please fill all fields'); return; }
+  showCampusaiLoading('Signing you in…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  hideCampusaiLoading();
+  currentUser = email;
+  const name = email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  persistStudentSession(email, name);
+  launchApp(name);
+}
+async function doSignup() {
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+  if (!name || !email) { alert('Please fill required fields'); return; }
+  showCampusaiLoading('Creating your account…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  hideCampusaiLoading();
+  currentUser = email;
+  persistStudentSession(email, name);
+  launchApp(name);
+}
+function launchApp(name) {
+  document.getElementById('authWrap').style.display = 'none';
+  const app = document.getElementById('appWrap');
+  app.style.display = 'flex';
+  document.getElementById('greetName').textContent = name.split(' ')[0];
+  document.getElementById('tbAvatar').textContent = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  updateTime();
+  setInterval(updateTime, 1000);
+  renderAll();
+  renderStudentAnnouncements();
+  updateStudentNotifDot();
+  initChat();
+}
+async function doLogout() {
+  showCampusaiLoading('Signing out…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  sessionStorage.removeItem('campusai_auth');
+  sessionStorage.removeItem('campusai_role');
+  sessionStorage.removeItem('campusai_display');
+  sessionStorage.removeItem('campusai_email');
+  window.location.href = window.location.pathname.replace(/[^/]*\.html$/, 'auth');
+}
+function updateTime() {
+  const now = new Date();
+  document.getElementById('heroTime').textContent = now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' · ' + now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.mn-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  const nav = document.getElementById('nav-'+id);
+  if (nav) nav.classList.add('active');
+  const mn = document.getElementById('mn-'+id);
+  if (mn) mn.classList.add('active');
+  if (id==='submit') { document.getElementById('successPanel').style.display='none'; document.getElementById('aiStatus').style.display='none'; }
+  if (id==='home') { renderStudentAnnouncements(); updateStudentNotifDot(); }
+  document.getElementById('mainContent').scrollTop = 0;
+}
+function showInfoTab(tab) {
+  document.querySelectorAll('.info-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.info-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  const tabs = ['bus','lostfound','medical','fees','emergency'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.info-tab')[idx].classList.add('active');
+}
+
+// ===== RENDER =====
+function renderAll() { renderRecent(); renderIssues('all'); updateStats(); }
+function updateStats() {
+  const total = complaints.length;
+  const res = complaints.filter(c=>c.status==='Resolved').length;
+  const prog = complaints.filter(c=>c.status==='In Progress').length;
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-res').textContent = res;
+  document.getElementById('st-prog').textContent = prog;
+}
+function renderRecent() {
+  const el = document.getElementById('recentList');
+  const colors = {'Submitted':'#818cf8','In Progress':'#fbbf24','Resolved':'#34d399'};
+  el.innerHTML = complaints.slice(0,4).map(c=>`
+    <div class="act-item fadein">
+      <div class="act-dot" style="background:${colors[c.status]||'#64748b'}"></div>
+      <div class="act-info"><div class="act-desc">${c.desc}</div><div class="act-meta">${c.category} · ${c.time}</div></div>
+      <span class="badge badge-${c.status==='Submitted'?'sub':c.status==='In Progress'?'prog':'res'}">${c.status}</span>
+    </div>`).join('');
+}
+let currentFilter = 'all';
+function filterIssues(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIssues(filter);
+}
+function renderIssues(filter) {
+  const el = document.getElementById('issuesList');
+  const filtered = filter==='all' ? complaints : complaints.filter(c=>c.status===filter);
+  if (!filtered.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);">No complaints found.</div>'; return; }
+  const pct = {'Submitted':12,'In Progress':55,'Resolved':100};
+  const col = {'Submitted':'var(--accent)','In Progress':'var(--amber)','Resolved':'var(--green)'};
+  el.innerHTML = filtered.map(c=>`
+    <div class="issue-card fadein">
+      <div class="ic-header">
+        <div><div class="ic-id">${c.id}</div><div class="ic-time">⏰ ${c.time}</div></div>
+        <span class="badge badge-${c.status==='Submitted'?'sub':c.status==='In Progress'?'prog':'res'}">${c.status}</span>
+      </div>
+      <div class="ic-desc">${c.desc}</div>
+      <div class="ic-meta">
+        <span class="ic-tag">📂 ${c.category}</span>
+        <span class="ic-tag">🏢 ${c.dept}</span>
+        ${c.loc?`<span class="ic-tag">📍 ${c.loc}</span>`:''}
+        <span class="ic-tag" style="color:${c.priority==='Urgent'?'var(--red)':c.priority==='High'?'var(--amber)':'var(--text2)'}">⚡ ${c.priority||'Normal'}</span>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:6px;">
+          <span>Submitted</span><span>In Review</span><span>In Progress</span><span>Resolved</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct[c.status]||12}%;background:${col[c.status]};"></div></div>
+      </div>
+      ${c.response?`<div class="response-box"><strong>✅ Admin Response:</strong>${c.response}</div>`:''}
+    </div>`).join('');
+}
+
+// ===== SUBMIT =====
+async function submitComplaint() {
+  const desc = document.getElementById('compDesc').value.trim();
+  const manualCat = document.getElementById('compCat').value;
+  const loc = document.getElementById('compLoc').value;
+  const pri = document.getElementById('compPri').value;
+  if (!desc) { alert('⚠️ Please describe your problem!'); return; }
+  document.getElementById('aiStatus').style.display = 'none';
+  document.getElementById('successPanel').style.display = 'none';
+  document.getElementById('submitBtn').disabled = true;
+  showCampusaiLoading('AI is processing your complaint…');
+  const t0 = Date.now();
+  let category = manualCat;
+  let confidence = '—';
+  if (!category) {
+    const result = await classifyWithAI(desc);
+    category = result.category; confidence = result.confidence;
+  } else { confidence = '100% (Manual)'; }
+  const dept = DEPT_MAP[category] || 'Admin Office';
+  const id = 'TRK-' + (100 + Math.floor(Math.random()*900));
+  complaints.unshift({id, desc, category, dept, status:'Submitted', priority:pri, loc, time:'Just now', response:'', user: currentUser});
+  const elapsed = Date.now() - t0;
+  if (elapsed < CAMPUSAI_LOAD_MS) await campusaiDelay(CAMPUSAI_LOAD_MS - elapsed);
+  hideCampusaiLoading();
+  document.getElementById('trackIdBig').textContent = id;
+  document.getElementById('detCat').textContent = category;
+  document.getElementById('detDept').textContent = dept;
+  document.getElementById('detConf').textContent = confidence;
+  document.getElementById('successPanel').style.display = 'block';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('compDesc').value = '';
+  renderAll();
+}
+async function classifyWithAI(text) {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer YOUR_OPENROUTER_API_KEY_HERE','HTTP-Referer':'https://campusai.vercel.app','X-Title':'CampusAI'},
+      body:JSON.stringify({model:'meta-llama/llama-3.1-8b-instruct:free',max_tokens:50,messages:[{role:'system',content:'Classify campus complaints. Categories: Bathroom & Hygiene, Anti-Ragging & Safety, Mess & Food Quality, Academic Issues, Infrastructure/Maintenance, Lost & Found, Other. Reply ONLY: CATEGORY|CONFIDENCE%'},{role:'user',content:text}]})
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || '';
+    const parts = reply.split('|');
+    const valid = ['Bathroom & Hygiene','Anti-Ragging & Safety','Mess & Food Quality','Academic Issues','Infrastructure/Maintenance','Lost & Found','Other'];
+    const cat = valid.find(v => parts[0] && parts[0].includes(v.split(' ')[0])) || keywordClassify(text);
+    return { category: cat, confidence: parts[1] || Math.floor(75+Math.random()*20)+'%' };
+  } catch(e) { return { category: keywordClassify(text), confidence: Math.floor(76+Math.random()*18)+'% (fallback)' }; }
+}
+function keywordClassify(text) {
+  const t = text.toLowerCase();
+  if (/bathroom|toilet|water|hygiene|clean|wash|soap|flush/.test(t)) return 'Bathroom & Hygiene';
+  if (/rag|bully|harass|threat|safety|scare|fear|intimidat/.test(t)) return 'Anti-Ragging & Safety';
+  if (/mess|food|meal|lunch|dinner|canteen|taste|cook|quality|roti|dal/.test(t)) return 'Mess & Food Quality';
+  if (/exam|result|marks|teacher|lecture|class|academic|attendance|faculty|professor/.test(t)) return 'Academic Issues';
+  if (/light|fan|ac|lift|wifi|internet|projector|electric|repair|broken|door|window/.test(t)) return 'Infrastructure/Maintenance';
+  if (/lost|found|missing|wallet|phone|bag|calculator|id card|watch/.test(t)) return 'Lost & Found';
+  return 'Other';
+}
+
+// ===== CHATBOT =====
+const OPENROUTER_KEY = 'YOUR_OPENROUTER_API_KEY_HERE';
+const SYSTEM_PROMPT = `You are CampusBot, an AI assistant for a college campus app. Help students with bus timings, medical, fees, scholarships, lost & found, emergency contacts, and complaints. Be friendly, concise, use emojis, under 120 words. Bus College→Hostel: 8AM,10:30AM,1PM,3:30PM,5PM,7PM,9:30PM. Hostel→College: 6:30AM,7:15AM,9AM,12PM,2:30PM,4:15PM,6:45PM,9PM. Health Center: Block A, Mon-Sat 9AM-5PM. Dr. Priya Mehta Tue&Thu 10AM-1PM. Emergency Ext 1122. Fees: Tuition ₹85,000/yr, Hostel ₹42,000/yr, Mess ₹3,200/month. Scholarships: Merit(CGPA≥8.5)₹20,000. Emergency: Campus 0651-XXXXXX, Police 100, Ambulance 108. If ragging/safety issue, take it very seriously and give emergency numbers immediately.`;
+
+function initChat() {
+  const msgs = document.getElementById('chatMsgs');
+  msgs.innerHTML = ''; chatHistory = [];
+  addBotMsg("👋 Hi! I'm **CampusBot**, your AI campus assistant.\n\nI can help you with:\n🚌 Bus timings · 🏥 Medical · 🔍 Lost & Found\n💰 Fees · 🏆 Scholarships · 🆘 Emergency · 📝 Complaints\n\nWhat do you need help with?");
+  document.getElementById('fabNotif').style.display = 'flex';
+}
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chatWindow');
+  const fab = document.getElementById('chatFab');
+  if (chatOpen) { win.classList.remove('hidden'); win.classList.add('visible'); fab.classList.add('open'); document.getElementById('fabNotif').style.display='none'; document.getElementById('chatInput').focus(); }
+  else { win.classList.add('hidden'); win.classList.remove('visible'); fab.classList.remove('open'); }
+}
+function addBotMsg(text) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div'); div.className = 'msg-wrap bot fadein';
+  div.innerHTML = `<div class="msg-bubble bot">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div><div class="msg-time">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+function addUserMsg(text) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div'); div.className = 'msg-wrap user fadein';
+  div.innerHTML = `<div class="msg-bubble user">${text}</div><div class="msg-time">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+function addTypingIndicator() {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div'); div.className='msg-wrap bot fadein'; div.id='typingIndicator';
+  div.innerHTML=`<div class="msg-bubble bot typing pulsing">CampusBot is typing…</div>`;
+  msgs.appendChild(div); msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTypingIndicator() { const el=document.getElementById('typingIndicator'); if(el)el.remove(); }
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isBotTyping) return;
+  input.value = ''; addUserMsg(text); chatHistory.push({role:'user',content:text});
+  isBotTyping = true; addTypingIndicator();
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${OPENROUTER_KEY}`,'HTTP-Referer':'https://campusai.vercel.app','X-Title':'CampusAI'},
+      body:JSON.stringify({model:'meta-llama/llama-3.1-8b-instruct:free',max_tokens:200,messages:[{role:'system',content:SYSTEM_PROMPT},...chatHistory.slice(-8)]})
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || fallbackReply(text);
+    chatHistory.push({role:'assistant',content:reply}); removeTypingIndicator(); addBotMsg(reply);
+  } catch(e) { removeTypingIndicator(); addBotMsg(fallbackReply(text)); }
+  isBotTyping = false;
+}
+function fallbackReply(text) {
+  const t = text.toLowerCase();
+  if (/bus|time|hostel|college/.test(t)) return '🚌 **Bus Timings:**\n**College → Hostel:** 8AM, 10:30AM, 1PM, 3:30PM, 5PM, 7PM, 9:30PM\n**Hostel → College:** 6:30AM, 7:15AM, 9AM, 12PM, 2:30PM, 4:15PM, 6:45PM, 9PM';
+  if (/medical|doctor|health|sick/.test(t)) return '🏥 **Health Center:** Block A, Mon-Sat 9AM-5PM\n**Doctor:** Dr. Priya Mehta — Tue & Thu 10AM-1PM\n**Emergency:** Ext 1122';
+  if (/fee|payment|tuition/.test(t)) return '💰 **Fees 2024-25:**\n• Tuition: ₹85,000/yr\n• Hostel: ₹42,000/yr\n• Mess: ₹3,200/month';
+  if (/scholarship|merit/.test(t)) return '🏆 **Scholarships:**\n• Merit (CGPA≥8.5): ₹20,000/yr\n• SC/ST: Full fee waiver\n• Sports: ₹15,000/yr';
+  if (/rag|bully|harass|unsafe/.test(t)) return '🛡️ **ANTI-RAGGING EMERGENCY**\n📞 Anti-Ragging Helpline: **1800-180-5522**\n📞 Campus Emergency: **0651-XXXXXX**\nAll complaints are 100% confidential!';
+  if (/lost|found|missing/.test(t)) return '🔍 To report lost/found:\n1. Go to **Info Hub → Lost & Found**\n2. Or submit via **Submit Issue**\n3. Security Office: Ext 1100';
+  if (/emergency|sos|help/.test(t)) return '🆘 **Emergency:**\n🚔 Police: 100\n🚑 Ambulance: 108\n🔥 Fire: 101\n🎓 Campus: 0651-XXXXXX';
+  return '🤖 I can help with bus times, medical, fees, scholarships, lost & found, and emergency contacts. What do you need?';
+}
+function chipSend(text) { document.getElementById('chatInput').value=text; sendChat(); document.getElementById('chatChips').style.display='none'; }
+
+function campusaiStudentBootstrap() {
+  if (sessionStorage.getItem('campusai_auth') !== '1' || sessionStorage.getItem('campusai_role') !== 'student') return;
+  const displayName = sessionStorage.getItem('campusai_display') || 'Student';
+  const email = sessionStorage.getItem('campusai_email') || '';
+  currentUser = email || displayName;
+  launchApp(displayName);
+}
+campusaiStudentBootstrap();
+</script>
+</body>
+</html>

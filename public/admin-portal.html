@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CampusAI — Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090f;--s1:#0d1117;--s2:#111827;--s3:#1a2235;--s4:#1e293b;
+  --accent:#f59e0b;--accent2:#fbbf24;--accent3:#fde68a;
+  --green:#10b981;--red:#ef4444;--amber:#f59e0b;--teal:#06b6d4;--blue:#3b82f6;--purple:#7c3aed;
+  --text:#f8fafc;--text2:#94a3b8;--text3:#475569;
+  --border:#1e293b;--border2:#2d3f5a;
+  --grad:linear-gradient(135deg,#d97706,#f59e0b);
+  --grad-full:linear-gradient(135deg,#7c3aed,#ec4899);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;font-size:18px;}
+h1,h2,h3{font-family:'Syne',sans-serif;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--s1);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+
+/* ===== AUTH ===== */
+#authWrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:var(--bg);overflow-y:auto;}
+.auth-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.12;}
+.orb1{width:400px;height:400px;background:#d97706;top:-100px;left:-100px;}
+.orb2{width:300px;height:300px;background:#7c3aed;bottom:-80px;right:-80px;}
+.orb3{width:200px;height:200px;background:#ef4444;top:50%;left:50%;}
+.auth-center{position:relative;z-index:2;width:100%;max-width:400px;padding:1.5rem;}
+.auth-brand{text-align:center;margin-bottom:2rem;}
+.brand-icon{width:64px;height:64px;background:var(--grad);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;box-shadow:0 0 40px rgba(245,158,11,0.4);}
+.brand-name{font-size:30px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;}
+.brand-sub{color:var(--text2);font-size:13px;margin-top:4px;}
+.portal-tag{display:inline-block;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--accent3);font-weight:600;margin-top:8px;}
+.auth-card{background:rgba(13,17,23,0.95);border:1px solid rgba(245,158,11,0.2);border-radius:24px;padding:2rem;backdrop-filter:blur(20px);}
+.auth-card-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+.auth-card-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:14px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.field input,.field select{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:17px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,0.12);}
+.field select option{background:var(--s2);}
+.btn-auth{width:100%;background:var(--grad);border:none;border-radius:11px;padding:13px;color:#fff;font-size:15px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-top:4px;transition:opacity 0.2s;box-shadow:0 4px 20px rgba(245,158,11,0.35);}
+.btn-auth:hover{opacity:0.9;}
+.demo-pill{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--accent3);margin-top:12px;text-align:center;}
+.student-link{text-align:center;margin-top:14px;font-size:13px;color:var(--text3);}
+.student-link a{color:#93c5fd;text-decoration:none;font-weight:600;}
+.student-link a:hover{text-decoration:underline;}
+
+/* ===== MAIN APP ===== */
+#appWrap{display:none;height:100vh;flex-direction:column;}
+.topbar{height:56px;background:var(--s1);border-bottom:1px solid rgba(245,158,11,0.15);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:100;}
+.tb-logo{width:32px;height:32px;background:var(--grad);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tb-title{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;flex:1;}
+.tb-badge{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--accent3);font-weight:600;}
+.tb-notif{width:32px;height:32px;background:var(--s2);border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;position:relative;}
+.tb-notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--s1);}
+.tb-avatar{width:32px;height:32px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.tb-logout{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:4px 10px;color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.tb-logout:hover{border-color:var(--red);color:var(--red);}
+
+.app-body{flex:1;display:flex;overflow:hidden;}
+.sidebar{width:200px;background:var(--s1);border-right:1px solid rgba(245,158,11,0.1);display:flex;flex-direction:column;padding:12px 8px;flex-shrink:0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.18s;margin-bottom:2px;color:var(--text2);font-size:17px;font-weight:500;}
+.nav-item:hover{background:var(--s2);color:var(--text);}
+.nav-item.active{background:rgba(245,158,11,0.12);color:var(--accent3);border:1px solid rgba(245,158,11,0.2);}
+.nav-item .ni{font-size:17px;width:20px;text-align:center;}
+.nav-sep{height:1px;background:var(--border);margin:8px 4px;}
+.nav-bottom{margin-top:auto;}
+
+.main-content{flex:1;overflow-y:auto;padding:20px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ===== DASHBOARD ===== */
+.dash-hero{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(239,68,68,0.06));border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:20px 24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.dash-hero::before{content:'⚙️';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:60px;opacity:0.1;}
+.dash-hero h2{font-size:22px;font-weight:800;margin-bottom:4px;}
+.dash-hero p{color:var(--text2);font-size:14px;}
+.dash-hero .hero-time{font-size:12px;color:var(--accent3);margin-top:6px;font-weight:500;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::after{content:attr(data-icon);position:absolute;right:10px;bottom:8px;font-size:28px;opacity:0.12;}
+.sc-num{font-size:28px;font-weight:800;font-family:'Syne',sans-serif;}
+.sc-label{font-size:11px;color:var(--text2);margin-top:2px;font-weight:500;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-head h3{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;}
+
+/* ===== ADMIN COMPLAINT CARDS ===== */
+.badge{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.2px;}
+.badge-sub{background:rgba(124,58,237,0.15);color:#c4b5fd;}
+.badge-prog{background:rgba(245,158,11,0.15);color:#fbbf24;}
+.badge-res{background:rgba(16,185,129,0.15);color:#34d399;}
+.admin-card{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;transition:border-color 0.2s;}
+.admin-card:hover{border-color:rgba(245,158,11,0.2);}
+.ic-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px;}
+.ic-id{font-size:12px;font-weight:700;color:var(--accent2);font-family:'Syne',sans-serif;}
+.ic-time{font-size:11px;color:var(--text3);}
+.ic-desc{font-size:17px;font-weight:500;margin-bottom:6px;line-height:1.5;}
+.ic-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ic-tag{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--text2);}
+.dept-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:20px;padding:2px 8px;font-size:11px;color:var(--teal);}
+.admin-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn-action{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-prog{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);}
+.btn-res{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.2);}
+.btn-del{background:rgba(239,68,68,0.08);color:#f87171;border:1px solid rgba(239,68,68,0.15);}
+.btn-prog:hover{background:rgba(245,158,11,0.25);}
+.btn-res:hover{background:rgba(16,185,129,0.25);}
+.btn-del:hover{background:rgba(239,68,68,0.18);}
+.res-input{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;margin-top:10px;resize:vertical;min-height:60px;}
+.res-input:focus{border-color:var(--accent);}
+
+/* ===== FILTERS ===== */
+.issues-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border2);color:var(--text2);background:var(--s2);transition:all 0.18s;font-family:'DM Sans',sans-serif;}
+.filter-btn.active{background:rgba(245,158,11,0.15);border-color:var(--accent);color:var(--accent3);}
+.search-bar{flex:1;max-width:260px;background:var(--s2);border:1px solid var(--border2);border-radius:20px;padding:7px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;}
+.search-bar:focus{border-color:var(--accent);}
+
+/* ===== ANNOUNCEMENTS ===== */
+.ann-form{background:var(--s2);border:1px solid rgba(245,158,11,0.2);border-radius:16px;padding:16px;margin-bottom:16px;}
+.ann-form h3{font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:12px;color:var(--accent3);}
+.f-field{margin-bottom:12px;}
+.f-field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;}
+.f-field input,.f-field select,.f-field textarea{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;color:var(--text);font-size:17px;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;}
+.f-field input:focus,.f-field select:focus,.f-field textarea:focus{border-color:var(--accent);}
+.f-field textarea{resize:vertical;min-height:80px;}
+.btn-post{background:var(--grad);border:none;border-radius:10px;padding:10px 20px;color:#fff;font-size:14px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity 0.2s;}
+.btn-post:hover{opacity:0.9;}
+.ann-list{display:flex;flex-direction:column;gap:10px;}
+.ann-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:12px;}
+.ann-icon-box{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ann-body{flex:1;}
+.ann-title{font-size:14px;font-weight:600;}
+.ann-meta{font-size:11px;color:var(--text3);margin-top:3px;}
+.ann-delete{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:all 0.2s;flex-shrink:0;}
+.ann-delete:hover{color:var(--red);background:rgba(239,68,68,0.08);}
+
+/* ===== DEPT OVERVIEW ===== */
+.dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+.dept-card{background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.dept-name{font-size:13px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;}
+.dept-bar-wrap{height:6px;background:var(--s4);border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.dept-bar{height:100%;border-radius:99px;}
+.dept-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);}
+
+/* ===== UTILS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fadein{animation:fadeUp 0.35s ease;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.pulsing{animation:pulse 1.5s ease infinite;}
+
+/* ===== MOBILE NAV ===== */
+.mobile-nav{display:none;background:var(--s1);border-top:1px solid rgba(245,158,11,0.12);padding:8px 4px;flex-shrink:0;}
+.mobile-nav-items{display:flex;}
+.mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;}
+.mn-icon{font-size:19px;}
+.mn-label{font-size:10px;color:var(--text3);font-weight:500;}
+.mn-item.active .mn-label{color:var(--accent3);}
+
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .mobile-nav{display:flex;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .dept-grid{grid-template-columns:1fr;}
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+#campusaiLoading{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(7,9,15,0.94);backdrop-filter:blur(10px);}
+#campusaiLoading.visible{display:flex;}
+.campusai-spin{width:56px;height:56px;border:4px solid rgba(245,158,11,0.25);border-top-color:var(--accent);border-radius:50%;animation:spin 0.75s linear infinite;margin-bottom:1.25rem;}
+#campusaiLoadingText{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;color:var(--text);text-align:center;max-width:22rem;padding:0 1rem;line-height:1.35;}
+</style>
+</head>
+<body>
+<div id="campusaiLoading" aria-live="polite" aria-busy="false">
+  <div class="campusai-spin" aria-hidden="true"></div>
+  <p id="campusaiLoadingText">Please wait…</p>
+</div>
+
+<!-- ========== AUTH ========== -->
+<div id="authWrap">
+  <div class="auth-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="auth-center">
+    <div class="auth-brand">
+      <div class="brand-icon">⚙️</div>
+      <div class="brand-name">CampusAI</div>
+      <div class="brand-sub">Campus management system</div>
+      <div class="portal-tag">🛡️ Admin Portal</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title">Admin Sign In</div>
+      <div class="auth-card-sub">Authorized personnel only</div>
+      <div class="field"><label>Admin Email</label><input type="email" id="loginEmail" placeholder="admin@college.edu" value="admin@college.edu"/></div>
+      <div class="field"><label>Department</label>
+        <select id="loginDept">
+          <option>Housekeeping Dept</option>
+          <option>Student Welfare Office</option>
+          <option>Mess Committee</option>
+          <option>Academic Affairs Office</option>
+          <option>Maintenance Dept</option>
+          <option>Security Office</option>
+          <option>Admin Office (Super Admin)</option>
+        </select>
+      </div>
+      <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" value="admin123"/></div>
+      <button class="btn-auth" onclick="doLogin()">Sign In as Admin →</button>
+      <div class="demo-pill">Demo: any email & password · Select your department above</div>
+      <div class="student-link">Student? <a href="auth">Go to sign in →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="appWrap" style="display:none;height:100vh;flex-direction:column;">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">⚙️</div>
+    <div class="tb-title">CampusAI Admin</div>
+    <div class="tb-badge" id="tbBadge">⚙️ Admin</div>
+    <div style="flex:1;"></div>
+    <div class="tb-notif" onclick="alert('🔔 Admin Alerts:\n• 3 new complaints submitted\n• 1 urgent issue flagged\n• Dept report due Friday')"><div class="tb-notif-dot"></div>🔔</div>
+    <div class="tb-avatar" id="tbAvatar">AD</div>
+    <button class="tb-logout" onclick="doLogout()">Logout</button>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="nav-item active" id="nav-home" onclick="showScreen('home')"><span class="ni">🏠</span> Dashboard</div>
+      <div class="nav-item" id="nav-complaints" onclick="showScreen('complaints')"><span class="ni">📋</span> All Complaints</div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" id="nav-announce" onclick="showScreen('announce')"><span class="ni">📢</span> Announcements</div>
+      <div class="nav-item" id="nav-depts" onclick="showScreen('depts')"><span class="ni">🏢</span> Departments</div>
+      <div class="nav-bottom">
+        <div class="nav-item" id="nav-settings" onclick="showScreen('settings')"><span class="ni">⚙️</span> Settings</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="main-content" id="mainContent">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="screen active fadein" id="screen-home">
+        <div class="dash-hero">
+          <h2>Welcome back, <span id="greetName">Admin</span> 👋</h2>
+          <p>Manage campus complaints · Post announcements · Monitor departments</p>
+          <div class="hero-time" id="heroTime">Loading time...</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card" data-icon="📋"><div class="sc-num" id="adm-total">3</div><div class="sc-label">Total Issues</div></div>
+          <div class="stat-card" data-icon="⏳"><div class="sc-num" style="color:var(--amber);" id="adm-open">2</div><div class="sc-label">Open Issues</div></div>
+          <div class="stat-card" data-icon="✅"><div class="sc-num" style="color:var(--green);" id="adm-done">1</div><div class="sc-label">Resolved</div></div>
+          <div class="stat-card" data-icon="⚡"><div class="sc-num" style="color:var(--red);" id="adm-urgent">0</div><div class="sc-label">Urgent</div></div>
+        </div>
+        <div class="section-head"><h3>Recent Complaints</h3><span style="font-size:12px;color:var(--accent2);cursor:pointer;" onclick="showScreen('complaints')">View all →</span></div>
+        <div id="recentAdminList"></div>
+      </div>
+
+      <!-- ===== ALL COMPLAINTS ===== -->
+      <div class="screen fadein" id="screen-complaints">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">📋 All Complaints</h3></div>
+        <div class="issues-filter">
+          <div class="filter-btn active" onclick="filterComplaints('all',this)">All</div>
+          <div class="filter-btn" onclick="filterComplaints('Submitted',this)">Submitted</div>
+          <div class="filter-btn" onclick="filterComplaints('In Progress',this)">In Progress</div>
+          <div class="filter-btn" onclick="filterComplaints('Resolved',this)">Resolved</div>
+          <div class="filter-btn" onclick="filterComplaints('Urgent',this)">🔴 Urgent</div>
+          <input class="search-bar" id="searchBar" placeholder="🔍 Search complaints..." oninput="searchComplaints(this.value)" style="margin-left:auto;"/>
+        </div>
+        <div id="adminList"></div>
+      </div>
+
+      <!-- ===== ANNOUNCEMENTS ===== -->
+      <div class="screen fadein" id="screen-announce">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">📢 Announcements</h3></div>
+        <div class="ann-form">
+          <h3>Post New Announcement</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="f-field"><label>Title</label><input type="text" id="annTitle" placeholder="e.g. Power outage Block C"/></div>
+            <div class="f-field"><label>Icon</label>
+              <select id="annIcon">
+                <option value="📢">📢 General</option><option value="⚡">⚡ Power / Alert</option>
+                <option value="🍽️">🍽️ Mess / Food</option><option value="📅">📅 Deadline</option>
+                <option value="🏆">🏆 Achievement</option><option value="🚌">🚌 Transport</option>
+                <option value="🏥">🏥 Health</option><option value="🛡️">🛡️ Safety</option>
+              </select>
+            </div>
+          </div>
+          <div class="f-field"><label>Message</label><textarea id="annMsg" placeholder="Write announcement details..."></textarea></div>
+          <button class="btn-post" onclick="postAnnouncement()">📢 Post Announcement</button>
+        </div>
+        <div class="section-head"><h3>Active Announcements</h3></div>
+        <div class="ann-list" id="annList"></div>
+      </div>
+
+      <!-- ===== DEPARTMENTS ===== -->
+      <div class="screen fadein" id="screen-depts">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">🏢 Department Overview</h3></div>
+        <div class="dept-grid" id="deptGrid"></div>
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="screen fadein" id="screen-settings">
+        <div class="section-head" style="margin-bottom:14px;"><h3 style="font-size:18px;">⚙️ Admin Settings</h3></div>
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:14px;">Admin Profile</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div style="width:52px;height:52px;background:var(--grad);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;" id="settingsAvatar">AD</div>
+            <div>
+              <div style="font-size:15px;font-weight:600;" id="settingsName">Admin</div>
+              <div style="font-size:12px;color:var(--text2);" id="settingsDept">Department</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text2);background:var(--s3);border-radius:10px;padding:12px;">
+            To update admin credentials or add new admin accounts, contact the IT department or Super Admin.
+          </div>
+        </div>
+        <div style="background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:20px;">
+          <div style="font-size:14px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:14px;">System Info</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text2);">Portal Version</span><span>CampusAI v2.0</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text2);">AI Model</span><span>LLaMA 3.1 via OpenRouter</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:var(--text2);">Build</span><span style="color:var(--green);">Admin Separate Build</span></div>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-body -->
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-nav">
+    <div class="mobile-nav-items">
+      <div class="mn-item active" id="mn-home" onclick="showScreen('home')"><div class="mn-icon">🏠</div><div class="mn-label">Home</div></div>
+      <div class="mn-item" id="mn-complaints" onclick="showScreen('complaints')"><div class="mn-icon">📋</div><div class="mn-label">Issues</div></div>
+      <div class="mn-item" id="mn-announce" onclick="showScreen('announce')"><div class="mn-icon">📢</div><div class="mn-label">Posts</div></div>
+      <div class="mn-item" id="mn-depts" onclick="showScreen('depts')"><div class="mn-icon">🏢</div><div class="mn-label">Depts</div></div>
+    </div>
+  </div>
+</div><!-- /appWrap -->
+
+<script>
+let currentAdmin = null;
+let adminDept = '';
+
+let complaints = [
+  {id:'TRK-001',desc:'Water not coming in 3rd floor bathroom Block B since 2 days. Smell is bad too.',category:'Bathroom & Hygiene',dept:'Housekeeping Dept',status:'Resolved',priority:'High',loc:'Block B, 3rd Floor',time:'2 days ago',response:'Pipe blockage identified and fixed. Water supply restored. Cleaning also done.',user:'student@college.edu'},
+  {id:'TRK-002',desc:'Food quality in mess is very poor this week. Dal is watery and roti is half-cooked.',category:'Mess & Food Quality',dept:'Mess Committee',status:'In Progress',priority:'Normal',loc:'Main Mess',time:'5 hours ago',response:'',user:'student2@college.edu'},
+  {id:'TRK-003',desc:'Projector in Room 204 Lecture Block not working for past 3 days. Classes are affected.',category:'Infrastructure/Maintenance',dept:'Maintenance Dept',status:'Submitted',priority:'Normal',loc:'Lecture Block, Room 204',time:'Just now',response:'',user:'student3@college.edu'},
+];
+
+const ANN_STORAGE_KEY = 'campusai_announcements_v1';
+const DEFAULT_ANNOUNCEMENTS = [
+  {id:1, title:'Power outage — Block C', msg:'Scheduled maintenance today 6:00 PM – 8:00 PM. Backup power available for labs.', icon:'⚡', time:'Today', color:'rgba(239,68,68,0.12)'},
+  {id:2, title:'Special Diwali Mess Menu', msg:'Special menu tomorrow dinner. Sweets and snacks included.', icon:'🍽️', time:'Today', color:'rgba(16,185,129,0.12)'},
+  {id:3, title:'Fee Payment Deadline', msg:'Tuition fee last date: June 30. Pay at Finance Office or online portal. No late fee till then.', icon:'📅', time:'Yesterday', color:'rgba(124,58,237,0.12)'},
+  {id:4, title:'Scholarship Applications Open', msg:'Merit scholarship form available at Admin Office. CGPA ≥ 8.5 required.', icon:'🏆', time:'2 days ago', color:'rgba(6,182,212,0.12)'},
+];
+function cloneDefaultAnnouncements() {
+  return DEFAULT_ANNOUNCEMENTS.map(function(a){ return Object.assign({}, a); });
+}
+function loadAnnouncementsFromStorage() {
+  try {
+    var s = localStorage.getItem(ANN_STORAGE_KEY);
+    if (s === null || s === '') return cloneDefaultAnnouncements();
+    var p = JSON.parse(s);
+    return Array.isArray(p) ? p : cloneDefaultAnnouncements();
+  } catch (e) {
+    return cloneDefaultAnnouncements();
+  }
+}
+function saveAnnouncementsToStorage() {
+  try { localStorage.setItem(ANN_STORAGE_KEY, JSON.stringify(announcements)); } catch (e) {}
+}
+let announcements = loadAnnouncementsFromStorage();
+
+const DEPT_COLORS = {
+  'Housekeeping Dept':'#06b6d4','Student Welfare Office':'#ef4444','Mess Committee':'#f59e0b',
+  'Academic Affairs Office':'#8b5cf6','Maintenance Dept':'#64748b','Security Office':'#ec4899','Admin Office':'#10b981'
+};
+
+const CAMPUSAI_LOAD_MS = 2600;
+function campusaiDelay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function showCampusaiLoading(msg){
+  var o = document.getElementById('campusaiLoading');
+  var t = document.getElementById('campusaiLoadingText');
+  if (t) t.textContent = msg || 'Please wait…';
+  if (o) { o.setAttribute('aria-busy','true'); o.classList.add('visible'); }
+}
+function hideCampusaiLoading(){
+  var o = document.getElementById('campusaiLoading');
+  if (o) { o.setAttribute('aria-busy','false'); o.classList.remove('visible'); }
+}
+
+// ===== AUTH =====
+function persistAdminSession(email, displayName, dept) {
+  sessionStorage.setItem('campusai_auth','1');
+  sessionStorage.setItem('campusai_role','admin');
+  sessionStorage.setItem('campusai_display', displayName);
+  sessionStorage.setItem('campusai_email', email || '');
+  sessionStorage.setItem('campusai_admin_dept', dept || '');
+}
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPass').value;
+  const dept = document.getElementById('loginDept').value;
+  if (!email || !pass) { alert('Please fill all fields'); return; }
+  showCampusaiLoading('Opening admin portal…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  hideCampusaiLoading();
+  currentAdmin = email; adminDept = dept;
+  const name = email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  persistAdminSession(email, name, dept);
+  launchApp(name, dept);
+}
+function launchApp(name, dept) {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('appWrap').style.display = 'flex';
+  document.getElementById('greetName').textContent = name.split(' ')[0];
+  document.getElementById('tbBadge').textContent = '⚙️ ' + dept.replace(' (Super Admin)','');
+  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('tbAvatar').textContent = initials;
+  document.getElementById('settingsAvatar').textContent = initials;
+  document.getElementById('settingsName').textContent = name;
+  document.getElementById('settingsDept').textContent = dept;
+  updateTime(); setInterval(updateTime, 1000);
+  if (!localStorage.getItem(ANN_STORAGE_KEY)) saveAnnouncementsToStorage();
+  renderAll();
+}
+async function doLogout() {
+  showCampusaiLoading('Signing out…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  sessionStorage.removeItem('campusai_auth');
+  sessionStorage.removeItem('campusai_role');
+  sessionStorage.removeItem('campusai_display');
+  sessionStorage.removeItem('campusai_email');
+  sessionStorage.removeItem('campusai_admin_dept');
+  window.location.href = window.location.pathname.replace(/[^/]*\.html$/, 'auth');
+}
+function updateTime() {
+  const now = new Date();
+  document.getElementById('heroTime').textContent = now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' · ' + now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.mn-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  const nav = document.getElementById('nav-'+id);
+  if (nav) nav.classList.add('active');
+  const mn = document.getElementById('mn-'+id);
+  if (mn) mn.classList.add('active');
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+// ===== RENDER =====
+function renderAll() {
+  renderAdminList(complaints);
+  renderRecentAdmin();
+  renderAnnouncements();
+  renderDepts();
+  updateStats();
+}
+function updateStats() {
+  const total = complaints.length;
+  const res = complaints.filter(c=>c.status==='Resolved').length;
+  const urgent = complaints.filter(c=>c.priority==='Urgent').length;
+  document.getElementById('adm-total').textContent = total;
+  document.getElementById('adm-open').textContent = total - res;
+  document.getElementById('adm-done').textContent = res;
+  document.getElementById('adm-urgent').textContent = urgent;
+}
+function renderRecentAdmin() {
+  const el = document.getElementById('recentAdminList');
+  el.innerHTML = complaints.slice(0,3).map((c,i)=>renderAdminCard(c,i,true)).join('');
+}
+
+let currentFilter = 'all';
+let currentSearch = '';
+function filterComplaints(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('#screen-complaints .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function searchComplaints(val) { currentSearch = val.toLowerCase(); applyFilters(); }
+function applyFilters() {
+  let filtered = complaints;
+  if (currentFilter === 'Urgent') filtered = filtered.filter(c=>c.priority==='Urgent');
+  else if (currentFilter !== 'all') filtered = filtered.filter(c=>c.status===currentFilter);
+  if (currentSearch) filtered = filtered.filter(c=>c.desc.toLowerCase().includes(currentSearch)||c.category.toLowerCase().includes(currentSearch)||c.id.toLowerCase().includes(currentSearch));
+  renderAdminList(filtered);
+}
+
+function renderAdminList(list) {
+  const el = document.getElementById('adminList');
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);">No complaints found.</div>'; return; }
+  const indices = list.map(c=>complaints.indexOf(c));
+  el.innerHTML = list.map((c,li)=>renderAdminCard(c, indices[li], false)).join('');
+}
+function renderAdminCard(c, i, compact) {
+  const color = DEPT_COLORS[c.dept]||'#64748b';
+  return `
+    <div class="admin-card fadein" style="${c.priority==='Urgent'?'border-color:rgba(239,68,68,0.3);':''}">
+      <div class="ic-header">
+        <div>
+          <div class="ic-id">${c.id} <span class="dept-tag" style="border-color:${color}22;color:${color};">→ ${c.dept}</span></div>
+          <div class="ic-time">${c.time} · 👤 ${c.user} · Priority: <span style="color:${c.priority==='Urgent'?'var(--red)':c.priority==='High'?'var(--amber)':'var(--text2)'};">${c.priority||'Normal'}</span></div>
+        </div>
+        <span class="badge badge-${c.status==='Submitted'?'sub':c.status==='In Progress'?'prog':'res'}">${c.status}</span>
+      </div>
+      <div class="ic-desc">${c.desc}</div>
+      <div class="ic-meta">
+        <span class="ic-tag">📂 ${c.category}</span>
+        ${c.loc?`<span class="ic-tag">📍 ${c.loc}</span>`:''}
+      </div>
+      ${!compact?`<textarea class="res-input" id="adminRes-${i}" placeholder="Type resolution / response for student...">${c.response||''}</textarea>`:''}
+      <div class="admin-actions">
+        <button class="btn-action btn-prog" onclick="adminUpdate(${i},'In Progress')">▶ In Progress</button>
+        <button class="btn-action btn-res" onclick="adminUpdate(${i},'Resolved')">✓ Resolved</button>
+        <button class="btn-action btn-del" onclick="adminDelete(${i})">🗑 Delete</button>
+      </div>
+    </div>`;
+}
+async function adminUpdate(i, status) {
+  const resEl = document.getElementById('adminRes-'+i);
+  const responseVal = resEl ? resEl.value : '';
+  showCampusaiLoading('Updating complaint status…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  complaints[i].status = status;
+  complaints[i].response = responseVal;
+  hideCampusaiLoading();
+  renderAll(); applyFilters();
+}
+async function adminDelete(i) {
+  if (!confirm('Delete this complaint?')) return;
+  showCampusaiLoading('Removing complaint…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  complaints.splice(i, 1);
+  hideCampusaiLoading();
+  renderAll(); applyFilters();
+}
+
+// ===== ANNOUNCEMENTS =====
+async function postAnnouncement() {
+  const title = document.getElementById('annTitle').value.trim();
+  const msg = document.getElementById('annMsg').value.trim();
+  const icon = document.getElementById('annIcon').value;
+  if (!title || !msg) { alert('Please fill title and message'); return; }
+  showCampusaiLoading('Publishing announcement…');
+  await campusaiDelay(CAMPUSAI_LOAD_MS);
+  hideCampusaiLoading();
+  announcements.unshift({id: Date.now(), title, msg, icon, time:'Just now', color:'rgba(245,158,11,0.08)'});
+  document.getElementById('annTitle').value = '';
+  document.getElementById('annMsg').value = '';
+  saveAnnouncementsToStorage();
+  renderAnnouncements();
+}
+function deleteAnnouncement(id) {
+  announcements = announcements.filter(function(a){ return a.id !== id; });
+  saveAnnouncementsToStorage();
+  renderAnnouncements();
+}
+function renderAnnouncements() {
+  const el = document.getElementById('annList');
+  if (!el) return;
+  if (!announcements.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text2);">No announcements yet.</div>'; return; }
+  el.innerHTML = announcements.map(a=>`
+    <div class="ann-card fadein">
+      <div class="ann-icon-box" style="background:${a.color||'rgba(245,158,11,0.1)'};">${a.icon}</div>
+      <div class="ann-body">
+        <div class="ann-title">${a.title}</div>
+        <div class="ann-meta" style="margin-bottom:4px;">${a.time}</div>
+        <div style="font-size:12px;color:var(--text2);">${a.msg}</div>
+      </div>
+      <button class="ann-delete" onclick="deleteAnnouncement(${a.id})" title="Delete">✕</button>
+    </div>`).join('');
+}
+
+// ===== DEPTS =====
+function renderDepts() {
+  const el = document.getElementById('deptGrid');
+  if (!el) return;
+  const deptNames = Object.keys(DEPT_COLORS);
+  el.innerHTML = deptNames.map(dept=>{
+    const total = complaints.filter(c=>c.dept===dept).length;
+    const resolved = complaints.filter(c=>c.dept===dept&&c.status==='Resolved').length;
+    const inProgress = complaints.filter(c=>c.dept===dept&&c.status==='In Progress').length;
+    const pct = total ? Math.round((resolved/total)*100) : 0;
+    const color = DEPT_COLORS[dept]||'#64748b';
+    return `
+      <div class="dept-card fadein">
+        <div class="dept-name" style="color:${color};">${dept}</div>
+        <div class="dept-bar-wrap"><div class="dept-bar" style="width:${pct}%;background:${color};"></div></div>
+        <div class="dept-nums"><span>${resolved}/${total} resolved</span><span>${pct}%</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">${inProgress} in progress · ${total-resolved-inProgress} pending</div>
+      </div>`;
+  }).join('');
+}
+
+function campusaiAdminBootstrap() {
+  if (sessionStorage.getItem('campusai_auth') !== '1' || sessionStorage.getItem('campusai_role') !== 'admin') return;
+  const name = sessionStorage.getItem('campusai_display') || 'Admin';
+  const dept = sessionStorage.getItem('campusai_admin_dept') || 'Housekeeping Dept';
+  const email = sessionStorage.getItem('campusai_email') || '';
+  currentAdmin = email; adminDept = dept;
+  launchApp(name, dept);
+}
+campusaiAdminBootstrap();
+</script>
+</body>
+</html>
