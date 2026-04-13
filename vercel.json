@@ -2,5 +2,5 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "nodejs": "20.x"
+  "nodejs": "18.x"
 }
